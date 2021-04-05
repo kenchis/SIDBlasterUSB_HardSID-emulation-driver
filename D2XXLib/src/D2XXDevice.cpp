@@ -217,9 +217,9 @@ int D2XXDevice::SetSIDType(DWORD index, SID_TYPE sidtype) {
 	}
 	ft_status = FT_EE_Read(handle,&mypdata);
 
-        if (ft_status != FT_OK) {
-          return 1;
-        }
+	if (ft_status != FT_OK) {
+		return 1;
+	}
 
 	switch (sidtype)
 	{
@@ -236,10 +236,12 @@ int D2XXDevice::SetSIDType(DWORD index, SID_TYPE sidtype) {
 		return 1;
 	}
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	mypdata.RIsD2XX = 1; // non-zero if using D2XX driver
 
 	ft_status = FT_EE_Program(handle, &mypdata);
 	
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
 	return ft_status;
 }
 
@@ -250,7 +252,7 @@ int D2XXDevice::SetSerialNo(DWORD index, const char *serialNo) {
 	char ManufacturerIdBuf[16];
 	char DescriptionBuf[64];
 	char SerialNumberBuf[16];
-        memset(SerialNumberBuf, '\0', 16);
+	memset(SerialNumberBuf, '\0', 16);
 
 	mypdata.Signature1 = 0x00000000;
 	mypdata.Signature2 = 0xffffffff;
@@ -266,20 +268,22 @@ int D2XXDevice::SetSerialNo(DWORD index, const char *serialNo) {
 	}
 	ft_status = FT_EE_Read(handle, &mypdata);
 
-        if (ft_status != FT_OK) {
-          return 1;
-        }
+	if (ft_status != FT_OK) {
+		return 1;
+	}
 
 #ifdef WIN32
-        strncpy_s(SerialNumberBuf, 16, serialNo, 8);
+	strncpy_s(SerialNumberBuf, 16, serialNo, 8);
 #elif defined linux || __APPLE__
-        strncpy(SerialNumberBuf, serialNo, 8);
+	strncpy(SerialNumberBuf, serialNo, 8);
 #endif
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	mypdata.RIsD2XX = 1; // non-zero if using D2XX driver
 
 	ft_status = FT_EE_Program(handle, &mypdata);
 	
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
 	return ft_status;
 }
 
